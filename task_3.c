@@ -7,8 +7,7 @@ uint8_t counter = 0;
 #define LED_PIN_3 3
 #define LED_PIN_4 4
 
-#define BUTTON_1 5
-#define BUTTON_2 6
+#define BUTTON_1 0
 
 void resetLeds()
 {
@@ -18,128 +17,103 @@ void resetLeds()
     gpio_put(LED_PIN_4, 0);
 }
 
-void button_isr(uint gpio, uint32_t events)
+int64_t timer_isr()
 {
-    if (gpio == BUTTON_1)
+    if (counter >= 15)
     {
-        if (counter != 15)
-        {
-            counter++;
-        }
-        else
-        {
-            counter = counter;
-        }
+        return 0;
     }
-    else if (gpio == BUTTON_2)
-    {
-        if (counter != 0)
-        {
-            counter--;
-        }
-        else
-        {
-            counter = counter;
-        }
-    }
+    counter++;
 
+    resetLeds();
     switch (counter)
     {
-    case 0:
-        resetLeds();
-        break;
-
     case 1:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         break;
 
     case 2:
-        resetLeds();
         gpio_put(LED_PIN_2, 1);
         break;
 
     case 3:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_2, 1);
         break;
 
     case 4:
-        resetLeds();
         gpio_put(LED_PIN_3, 1);
         break;
 
     case 5:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_3, 1);
         break;
 
     case 6:
-        resetLeds();
         gpio_put(LED_PIN_2, 1);
         gpio_put(LED_PIN_3, 1);
         break;
 
     case 7:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_2, 1);
         gpio_put(LED_PIN_3, 1);
         break;
 
     case 8:
-        resetLeds();
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 9:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 10:
-        resetLeds();
         gpio_put(LED_PIN_2, 1);
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 11:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_2, 1);
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 12:
-        resetLeds();
         gpio_put(LED_PIN_3, 1);
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 13:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_3, 1);
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 14:
-        resetLeds();
         gpio_put(LED_PIN_2, 1);
         gpio_put(LED_PIN_3, 1);
         gpio_put(LED_PIN_4, 1);
         break;
 
     case 15:
-        resetLeds();
         gpio_put(LED_PIN_1, 1);
         gpio_put(LED_PIN_2, 1);
         gpio_put(LED_PIN_3, 1);
         gpio_put(LED_PIN_4, 1);
         break;
+    }
+    return 100 * 10000;
+}
+
+void button_isr(uint gpio, uint32_t events)
+{
+    if (gpio == BUTTON_1)
+    {
+        counter = 0;
+        resetLeds();
     }
 }
 
@@ -161,17 +135,16 @@ int main(void)
 
     // Initiate buttons
     gpio_init(BUTTON_1);
-    gpio_init(BUTTON_2);
-
     gpio_set_dir(BUTTON_1, GPIO_IN);
-    gpio_set_dir(BUTTON_2, GPIO_IN);
 
     gpio_pull_up(BUTTON_1);
-    gpio_pull_up(BUTTON_2);
 
-    // Creates IRQ actions for both buttons
+    // Configure interrupt for the button
     gpio_set_irq_enabled_with_callback(BUTTON_1, GPIO_IRQ_EDGE_FALL, true, &button_isr);
-    gpio_set_irq_enabled_with_callback(BUTTON_2, GPIO_IRQ_EDGE_FALL, true, &button_isr);
+    irq_set_enabled(IO_IRQ_BANK0, true);
+
+    // Configure timer interrupt
+    add_alarm_in_us(100 * 10000, timer_isr, NULL, true);
 
     // Keeps the program alive
     while (1)
