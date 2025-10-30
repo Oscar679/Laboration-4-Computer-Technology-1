@@ -1,5 +1,6 @@
 #include "pico/stdlib.h"
 
+// Counter is altered and modified within an interrupt service routine, hence 'volatile'
 volatile uint8_t counter = 0;
 
 #define LED_PIN_1 1
@@ -28,25 +29,28 @@ int pattern_array[] = {
     0b1110,
     0b1111};
 
+// Updates LEDs
 void updateLeds(int pattern)
 {
-    gpio_put(LED_PIN_4, (pattern >> 3) & 0x1);
+    // The pattern (current index of pattern_array) is shifted so that the value, 0 or 1, is at the right most bit. The value is then sent as a parameter to gpio_put()
+    gpio_put(LED_PIN_4, (pattern >> 3) & 0x1); // 0x1 ensures that only the right most bit is handled
     gpio_put(LED_PIN_3, (pattern >> 2) & 0x1);
     gpio_put(LED_PIN_2, (pattern >> 1) & 0x1);
     gpio_put(LED_PIN_1, pattern & 0x1);
 }
 
+// Interrupt Service Routine for button
 void button_isr(uint gpio, uint events)
 {
     if (gpio == BUTTON_1)
     {
-        counter = (counter + 1) & 0xF;
+        counter = (counter + 1) & 0xF; // Ensures that the counter increases by 1, and is NOT greater than 15
     }
     else if (gpio == BUTTON_2)
     {
-        counter = (counter - 1) & 0xF;
+        counter = (counter - 1) & 0xF; // Ensures that the counter decreases by 1, and is NOT greater than 15
     }
-    updateLeds(pattern_array[counter]);
+    updateLeds(pattern_array[counter]); // Calls method with current binary number as parameter
 }
 
 int main(void)
@@ -77,6 +81,7 @@ int main(void)
     gpio_set_irq_enabled_with_callback(BUTTON_1, GPIO_IRQ_EDGE_FALL, true, &button_isr);
     gpio_set_irq_enabled(BUTTON_2, GPIO_IRQ_EDGE_FALL, true);
 
+    // Keeps the program alive
     while (1)
     {
     }
