@@ -53,7 +53,7 @@ void button_isr(uint gpio, uint events)
     updateLeds(pattern_array[counter]); // Calls method with current binary number as parameter
 }
 
-int main(void)
+int main()
 {
     stdio_init_all();
 
