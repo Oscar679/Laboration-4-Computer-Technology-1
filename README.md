@@ -173,6 +173,7 @@ int main(void)
     // Keeps the program alive
     while (1)
     {
+    tight_loop_contents();
     }
     return 0;
 }
