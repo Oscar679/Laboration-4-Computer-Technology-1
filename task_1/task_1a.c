@@ -6,7 +6,7 @@ const int LED_PIN = 0;
 const int BUTTON_1 = 1;
 const int BUTTON_2 = 2;
 
-int main()
+int main(void)
 {
     stdio_init_all();
 
@@ -36,4 +36,5 @@ int main()
         }
     }
     return 0;
+
 }
