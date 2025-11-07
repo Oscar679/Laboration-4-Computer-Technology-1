@@ -66,7 +66,7 @@ void button_isr(uint gpio, uint32_t events)
     }
 }
 
-int main(void)
+int main()
 {
 
     stdio_init_all();
