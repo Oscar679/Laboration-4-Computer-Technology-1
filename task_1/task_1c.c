@@ -13,7 +13,7 @@
 #define SIO_GPIO_OUT_SET ((volatile uint32_t *)(SIO_BASE + 0x014)) // Setting this bit to "1" sets that GPIO to HIGH
 #define SIO_GPIO_OUT_CLR ((volatile uint32_t *)(SIO_BASE + 0x018)) // Setting this bit to "1" sets that GPIO to LOW
 
-int main()
+int main(void)
 {
     stdio_init_all();
 
@@ -60,4 +60,5 @@ int main()
         sleep_ms(100); // Small delay
     }
     return 0;
+
 }
